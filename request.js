@@ -7,6 +7,10 @@ const bookData = {
   Author: "J.K Rowling",
   Year_Published: "1998"
 };
+needle.post('http://localhost:3000/add-book', bookData, (err, res) => {
+  if (err) throw err;
+  console.log(res.body);   // Should print { success: true } or { success: false }
+});
 
 needle.get('http://localhost:3000/find-by-author?author=J.K+Rowling', (err, res) => {
   if (err) throw err;
@@ -18,7 +22,4 @@ needle.get('http://localhost:3000/find-by-isbn-author?isbn=0-7475-3849-2&author=
   console.log('Book found:', res.body);
 });
 
-needle.post('http://localhost:3000/add-book', bookData, (err, res) => {
-  if (err) throw err;
-  console.log(res.body);   // Should print { success: true } or { success: false }
-});
+

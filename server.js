@@ -7,23 +7,39 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
 // POST method to add books
+
 app.post('/add-book', (req, res) => {
   const { Bookname, ISBN, Author, Year_Published } = req.body;
   if (!Bookname || !ISBN || !Author || !Year_Published) {
     return res.json({ success: false });
   }
 
-  const bookEntry = `${Bookname},${ISBN},${Author},${Year_Published}\n`;
-  fs.appendFile('books.txt', bookEntry, (err) => {
-    if (err) {
+  // Define the book entry
+  const bookEntry = `${Bookname},${ISBN},${Author},${Year_Published}`;
+
+
+  fs.readFile('books.txt', 'utf8', (err, data) => {
+    if (err && err.code !== 'ENOENT') {
       console.error(err);
       return res.json({ success: false });
     }
-    res.json({ success: true });
+
+
+    const contentToAppend = data ? `\n${bookEntry}` : bookEntry;
+
+    fs.appendFile('books.txt', contentToAppend, (appendErr) => {
+      if (appendErr) {
+        console.error(appendErr);
+        return res.json({ success: false });
+      }
+      res.json({ success: true });
+    });
   });
 });
 
-// GET method to retrieve book details by ISBN and Author
+
+
+// GET method to retrieve book details
 app.get('/find-by-isbn-author', (req, res) => {
   const { isbn, author } = req.query;
 
@@ -41,13 +57,9 @@ app.get('/find-by-isbn-author', (req, res) => {
 });
 
 app.get('/find-by-author', (req, res) => {
-  fs.readFile('books.txt', "utf8", (err, data) => { // Correctly use fs.readFile
-    if (err) {
-      console.error(err);
-      res.status(500).send('Error reading book data.');
-      return;
-    }
-
+  fs.readFile('books.txt', "utf8", (err, data) => { 
+    if (err) throw err;
+    //made it const instead of var 
     const lines = data.split('\n');
     const results = [];
 
